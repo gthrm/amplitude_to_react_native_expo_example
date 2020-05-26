@@ -1,17 +1,41 @@
+// App.js
 import * as React from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-
-const instructions = Platform.select({
-  ios: `Press Cmd+R to reload,\nCmd+D or shake for dev menu`,
-  android: `Double tap R on your keyboard to reload,\nShake or press menu button for dev menu`,
-});
+import { StyleSheet, View, Button } from 'react-native';
+import { logEvent, events, identify } from './amplitude';
 
 export default function App() {
+  const user = { id: '123456789', userName: 'Jack', email: 'Jack@Jack.com' };
+  const error = { code: 400, message: 'Not Found' };
+
+  const apiLogIn = () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        console.log('user', user);
+        identify(user.id, user);
+        resolve(user);
+      }, 1000)
+    });
+  }
+  const onPressHandler = async () => {
+    const apiUser = await apiLogIn();
+    logEvent(events.LOG_IN, apiUser);
+  };
+
+  const errorHandler = () => {
+    logEvent(events.ERROR_EVENT, error);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.welcome}>Welcome to React Native!</Text>
-      <Text style={styles.instructions}>To get started, edit App.js</Text>
-      <Text style={styles.instructions}>{instructions}</Text>
+      <Button
+        onPress={onPressHandler}
+        title="LogIn"
+      />
+      <Button
+        onPress={errorHandler}
+        color="orangered"
+        title="Error"
+      />
     </View>
   );
 }
@@ -22,15 +46,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  }
 });
